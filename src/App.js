@@ -7,20 +7,19 @@ import { useEffect } from 'react';
 import getData from './api/getProductData';
 
 function App() {
+    const cartList = localStorage.getItem('cartList');
+    const initialCartList = cartList ? JSON.parse(cartList) : [];
     const [productItems, setProductItems] = useState([]);
-    const [cartItems, setCartItems] = useState([
-        {
-            id: 1,
-            imgSrc: 'asset/cherry.png',
-            name: '체리 두알',
-            price: 10000,
-            count: 1,
-        },
-    ]);
+    const [cartItems, setCartItems] = useState(initialCartList);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    //const [totalCount, setTotalCount] = useState(0);
 
     const toggleCart = () => {
         setIsCartOpen((prev) => !prev);
+    };
+
+    const onSubmit = (e) => {
+        localStorage.setItem('cartList', JSON.stringify(cartItems));
     };
 
     useEffect(() => {
@@ -30,6 +29,19 @@ function App() {
         };
         fetchProductData();
     }, []);
+
+    const totalCount = cartItems.reduce(
+        (acc, cur) => acc + cur.count * cur.price,
+        0
+    );
+
+    // useEffect(() => {
+    //     const result = cartItems.reduce(
+    //         (acc, cur) => acc + cur.count * cur.price,
+    //         0
+    //     );
+    //     setTotalCount(result);
+    // }, [cartItems]);
 
     return (
         <div className="relative min-h-screen">
@@ -59,7 +71,12 @@ function App() {
                         {productItems.length === 0 ? (
                             <h1>상품이 없습니다</h1>
                         ) : (
-                            <ProductList productItems={productItems} />
+                            <ProductList
+                                productItems={productItems}
+                                toggleCart={toggleCart}
+                                cartItems={cartItems}
+                                setCartItems={setCartItems}
+                            />
                         )}
                     </div>
                 </section>
@@ -100,20 +117,24 @@ function App() {
                                 </div>
                             </div>
                             <div id="cart-list">
-                                <CartList cartItems={cartItems} />
+                                <CartList
+                                    cartItems={cartItems}
+                                    setCartItems={setCartItems}
+                                />
                             </div>
                         </div>
                         <div className="border-t border-gray-200 p-6">
                             <div className="flex justify-between font-medium">
                                 <p>결제금액</p>
                                 <p className="font-bold" id="total-count">
-                                    0원
+                                    {totalCount.toLocaleString()}원
                                 </p>
                             </div>
                             <a
                                 id="payment-btn"
                                 href="./"
                                 className="flex items-center justify-center rounded-md border border-transparent bg-sky-400 px-6 py-3 mt-6 font-medium text-white shadow-sm hover:bg-sky-500"
+                                onClick={onSubmit}
                             >
                                 결제하기
                             </a>

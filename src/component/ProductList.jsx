@@ -1,8 +1,31 @@
 import React from 'react';
 
-const ProductList = ({ productItems }) => {
-    return productItems.map(({ imgSrc, name, id, price }) => (
-        <article id="product-card" key={id}>
+const ProductList = ({ productItems, toggleCart, cartItems, setCartItems }) => {
+    const onClickProduct = (index) => {
+        const currentProduct = productItems[index];
+        const resultIndex = cartItems.findIndex(
+            (item) => item.id === currentProduct.id
+        );
+
+        let newCartList;
+        if (-1 === resultIndex) {
+            newCartList = [...cartItems, { ...currentProduct, count: 1 }];
+        } else {
+            newCartList = [...cartItems];
+            newCartList[resultIndex].count += 1;
+        }
+
+        setCartItems(newCartList);
+
+        toggleCart();
+    };
+
+    return productItems.map(({ imgSrc, name, id, price }, index) => (
+        <article
+            id="product-card"
+            key={id}
+            onClick={() => onClickProduct(index)}
+        >
             <div className="rounded-lg overflow-hidden border-2 relative">
                 <img
                     src={imgSrc}
